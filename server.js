@@ -10,36 +10,45 @@ import path from "path";
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// middleware
-app.use(cors({
-  // origin: "http://localhost:5173",
-  origin: "https://remarkable-biscotti-1ec13b.netlify.app",
-
-  credentials: true
-}));
+// ======================
+// CORS (Allow All)
+// ======================
+app.use(cors());
 
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-
-// 🔥 serve uploads folder (IMPORTANT FIX)
-app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
-
-// 🔥 GLOBAL LOGGER (VERY IMPORTANT)
+// ======================
+// Logger
+// ======================
 app.use((req, res, next) => {
-  console.log("🌍 REQUEST:", req.method, req.url);
+  console.log(`${req.method} ${req.originalUrl}`);
+  console.log("Origin:", req.headers.origin);
   next();
 });
 
-// routes
+// ======================
+// Static Uploads
+// ======================
+app.use(
+  "/uploads",
+  express.static(path.join(process.cwd(), "uploads"))
+);
+
+// ======================
+// Routes
+// ======================
 app.use("/api/auth", authRoutes);
 
-// test route
 app.get("/", (req, res) => {
   res.send("API Running");
 });
 
-// connect DB + start server
-mongoose.connect(process.env.MONGO_URI)
+// ======================
+// MongoDB
+// ======================
+mongoose
+  .connect(process.env.MONGO_URI)
   .then(() => {
     console.log("✅ MongoDB Connected");
     console.log("DB:", mongoose.connection.name);
@@ -49,5 +58,5 @@ mongoose.connect(process.env.MONGO_URI)
     });
   })
   .catch((err) => {
-    console.log("❌ Mongo Error:", err.message);
+    console.log("MongoDB Error:", err.message);
   });
