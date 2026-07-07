@@ -4,61 +4,60 @@ dotenv.config();
 import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
-import path from "path";
 import authRoutes from "./routes/auth.js";
+import path from "path";
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// ===============================
-// CORS Configuration
-// ===============================
+// Allowed Origins
 const allowedOrigins = [
-  "http://localhost:5173",           // Local Vite
-  "http://localhost:3000",           // Local CRA (optional)
-  "https://your-admin.netlify.app",  // Replace with Admin URL
-  "https://your-customer.netlify.app"// Replace with Customer URL
+  "http://localhost:5173",
+  "https://earnest-horse-b41191.netlify.app",
 ];
 
+// CORS
 app.use(
   cors({
     origin: function (origin, callback) {
-      // Allow Postman, mobile apps, server-to-server requests
+      // Allow Postman and server requests
       if (!origin) return callback(null, true);
 
       if (allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("CORS Not Allowed"));
+        return callback(null, true);
       }
+
+      console.log("Blocked Origin:", origin);
+      callback(new Error("Not allowed by CORS"));
     },
     credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
-// Parse JSON
+// Body Parser
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-// Serve uploaded files
+// Static Uploads
 app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
 // Logger
 app.use((req, res, next) => {
-  console.log(`🌍 ${req.method} ${req.url}`);
+  console.log("🌍", req.method, req.originalUrl);
   next();
 });
 
 // Routes
 app.use("/api/auth", authRoutes);
 
-// Root Route
+// Test Route
 app.get("/", (req, res) => {
   res.send("API Running");
 });
 
-// MongoDB Connection
+// MongoDB
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => {
@@ -70,5 +69,5 @@ mongoose
     });
   })
   .catch((err) => {
-    console.error("❌ Mongo Error:", err.message);
+    console.log("❌ Mongo Error:", err.message);
   });

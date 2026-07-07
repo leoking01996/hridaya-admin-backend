@@ -240,6 +240,51 @@ router.post("/verify-otp", async (req, res) => {
 
 
 // ================= LOGIN =================
+// router.post("/login", async (req, res) => {
+//   try {
+//     const { email, password } = req.body;
+
+//     const admin = await Admin.findOne({ email });
+
+//     if (!admin) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "Invalid credentials",
+//       });
+//     }
+
+//     const isMatch = await bcrypt.compare(password, admin.password);
+
+//     if (!isMatch) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "Invalid credentials",
+//       });
+//     }
+
+//     const token = jwt.sign(
+//       { id: admin._id ,
+//         role: admin.role
+//       },
+//       process.env.JWT_SECRET,
+//       { expiresIn: "1d" }
+//     );
+
+//     return res.json({
+//       success: true,
+//       message: "Login successful",
+//       token,
+//       user: admin,
+//     });
+//   } catch (error) {
+//     console.log("LOGIN ERROR:", error);
+//     return res.status(500).json({
+//       success: false,
+//       message: error.message,
+//     });
+//   }
+// });
+// LOGIN
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -249,42 +294,44 @@ router.post("/login", async (req, res) => {
     if (!admin) {
       return res.status(400).json({
         success: false,
-        message: "Invalid credentials",
+        message: "Invalid Email",
       });
     }
 
-    const isMatch = await bcrypt.compare(password, admin.password);
+    const match = await bcrypt.compare(password, admin.password);
 
-    if (!isMatch) {
+    if (!match) {
       return res.status(400).json({
         success: false,
-        message: "Invalid credentials",
+        message: "Wrong Password",
       });
     }
 
     const token = jwt.sign(
-      { id: admin._id ,
-        role: admin.role
+      {
+        id: admin._id,
+        role: admin.role,
       },
       process.env.JWT_SECRET,
-      { expiresIn: "1d" }
+      {
+        expiresIn: "1d",
+      }
     );
 
     return res.json({
       success: true,
-      message: "Login successful",
       token,
       user: admin,
     });
-  } catch (error) {
-    console.log("LOGIN ERROR:", error);
-    return res.status(500).json({
+  } catch (err) {
+    console.log(err);
+
+    res.status(500).json({
       success: false,
-      message: error.message,
+      message: err.message,
     });
   }
 });
-
 
 // =================GET LOGIN =================
 router.get("/admins", verifyToken, async (req, res) => {
