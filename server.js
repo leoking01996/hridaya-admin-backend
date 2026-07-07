@@ -13,7 +13,7 @@ const PORT = process.env.PORT || 5000;
 // middleware
 app.use(cors({
   // origin: "http://localhost:5173",
-  origin: "  https://hridaya-admin-backend-4.onrender.com",
+  origin: "https://remarkable-biscotti-1ec13b.netlify.app",
 
   credentials: true
 }));
