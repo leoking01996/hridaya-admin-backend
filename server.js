@@ -10,45 +10,36 @@ import path from "path";
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// ======================
-// CORS (Allow All)
-// ======================
-app.use(cors());
+// middleware
+app.use(cors({
+  // origin: "http://localhost:5173",
+  origin: "  https://hridaya-admin-backend-4.onrender.com",
+
+  credentials: true
+}));
 
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 
-// ======================
-// Logger
-// ======================
+
+// 🔥 serve uploads folder (IMPORTANT FIX)
+app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
+
+// 🔥 GLOBAL LOGGER (VERY IMPORTANT)
 app.use((req, res, next) => {
-  console.log(`${req.method} ${req.originalUrl}`);
-  console.log("Origin:", req.headers.origin);
+  console.log("🌍 REQUEST:", req.method, req.url);
   next();
 });
 
-// ======================
-// Static Uploads
-// ======================
-app.use(
-  "/uploads",
-  express.static(path.join(process.cwd(), "uploads"))
-);
-
-// ======================
-// Routes
-// ======================
+// routes
 app.use("/api/auth", authRoutes);
 
+// test route
 app.get("/", (req, res) => {
   res.send("API Running");
 });
 
-// ======================
-// MongoDB
-// ======================
-mongoose
-  .connect(process.env.MONGO_URI)
+// connect DB + start server
+mongoose.connect(process.env.MONGO_URI)
   .then(() => {
     console.log("✅ MongoDB Connected");
     console.log("DB:", mongoose.connection.name);
@@ -58,5 +49,5 @@ mongoose
     });
   })
   .catch((err) => {
-    console.log("MongoDB Error:", err.message);
+    console.log("❌ Mongo Error:", err.message);
   });
