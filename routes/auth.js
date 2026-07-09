@@ -10,35 +10,36 @@ import Variant from "../models/variant.js";
 import Merchant from "../models/merchant.js";
 import Order from "../models/order.js";
 import multer from "multer";
-import path from "path";
+// import path from "path";
+import upload from "../middleware/upload.js";
 import { v4 as uuidv4 } from "uuid";
-import fs from "fs";
+// import fs from "fs";
 
-const uploadDir = "uploads";
+// const uploadDir = "uploads";
 
 // create folder if not exists
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir);
-  console.log("Uploads folder created");
-}
+// if (!fs.existsSync(uploadDir)) {
+//   fs.mkdirSync(uploadDir);
+//   console.log("Uploads folder created");
+// }
 
 
 const router = express.Router();
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, uploadDir);
-  },
+// const storage = multer.diskStorage({
+//   destination: function (req, file, cb) {
+//     cb(null, uploadDir);
+//   },
 
-  filename: function (req, file, cb) {
-    const ext = path.extname(file.originalname);
-    const uniqueName =
-      Date.now() + "-" + Math.round(Math.random() * 1e9) + ext;
+//   filename: function (req, file, cb) {
+//     const ext = path.extname(file.originalname);
+//     const uniqueName =
+//       Date.now() + "-" + Math.round(Math.random() * 1e9) + ext;
 
-    cb(null, uniqueName);
-  },
-});
+//     cb(null, uniqueName);
+//   },
+// });
 
-const upload = multer({ storage });
+// const upload = multer({ storage });
 
 
 
@@ -512,8 +513,8 @@ router.post("/addProduct", upload.any(), async (req, res) => {
     const product_id = uuidv4();
 
     // main image
-    const mainImage =
-      req.files.find((f) => f.fieldname === "image")?.filename || "";
+ const mainImage =
+req.files.find(f => f.fieldname === "image")?.path || "";
 
     const newProduct = await Product.create({
       product_id,
@@ -529,9 +530,9 @@ router.post("/addProduct", upload.any(), async (req, res) => {
     for (let i = 0; i < variants.length; i++) {
       const item = variants[i];
 
-      const variantImages = req.files
-        .filter((f) => f.fieldname === `variant_images_${i}[]`)
-        .map((img) => img.filename);
+     const variantImages = req.files
+.filter(f => f.fieldname === `variant_images_${i}[]`)
+.map(img => img.path);
 
       const newVariant = await Variant.create({
         variant_id: uuidv4(),
@@ -1164,9 +1165,9 @@ router.post(
         phone,
         national_id_number,
 
-        national_id_image: req.file
-          ? req.file.filename
-          : "",
+       national_id_image: req.file
+? req.file.path
+: "",
 
         status: "pending",
       });

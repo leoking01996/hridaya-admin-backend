@@ -44,6 +44,7 @@ app.get("/", (req, res) => {
   res.send("API Running");
 });
 console.log(process.env.MONGO_URI);
+console.log("DB:", mongoose.connection.name);
 // ======================
 // MongoDB
 // ======================
